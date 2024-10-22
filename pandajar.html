@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panda Jar</title>
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        #buttonContainer {
+            position: relative;
+        }
+        button {
+            padding: 20px;
+            font-size: 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #444;
+            color: white;
+            transition: transform 0.1s ease;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .panda {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .panda-name {
+            position: absolute;
+            bottom: 60px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+        }
+        .panda-face {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: relative;
+        }
+        .rainbow {
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+        }
+        .ear {
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .ear.left {
+            top: -5px;
+            left: -10px;
+        }
+        .ear.right {
+            top: -5px;
+            right: -10px;
+        }
+        .eye {
+            width: 8px;
+            height: 8px;
+            background-color: black;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .eye.left {
+            left: 15px;
+            top: 15px;
+        }
+        .eye.right {
+            right: 15px;
+            top: 15px;
+        }
+        .nose {
+            width: 10px;
+            height: 5px;
+            background-color: black;
+            border-radius: 5px;
+            position: absolute;
+            top: 25px;
+            left: 20px;
+        }
+        .mouth {
+            width: 15px;
+            height: 5px;
+            border: 2px solid black;
+            border-radius: 5px;
+            position: absolute;
+            top: 30px;
+            left: 17px;
+            transform: rotate(180deg);
+        }
+        #fullscreenButton, #removePandasButton, #saveButton, #loadButton {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #444;
+            color: white;
+            transition: transform 0.1s ease;
+        }
+        #fullscreenButton {
+            left: 20px;
+        }
+        #removePandasButton {
+            right: 20px;
+        }
+        #saveButton {
+            left: 150px;
+        }
+        #loadButton {
+            right: 200px;
+        }
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 100;
+        }
+        .popup-button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .yes-button {
+            background-color: green;
+            color: white;
+        }
+        .no-button {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="fullscreenButton">Fullscreen</button>
+    <button id="removePandasButton">Remove Pandas</button>
+    <button id="saveButton">Save Pandas</button>
+    <button id="loadButton">Load Pandas</button>
+    <div id="buttonContainer">
+        <button id="spawnPanda">Panda</button>
+    </div>
+    <div id="counter">Pandas: 0</div>
+    <div id="popup">
+        <p>The pandas are leaving to a panda sanctuary. Do you want to send them?</p>
+        <button class="popup-button yes-button">Yes</button>
+        <button class="popup-button no-button">No</button>
+    </div>
+
+    <script>
+        const pandaColors = ['white', 'red', '#1abc9c', 'lightgreen'];
+        const pandaNames = [
+            'Bamboo', 'Panda', 'Po', 'Chubbs', 'Mochi',
+            'Puddles', 'Snickers', 'Coco', 'Fluffy', 'Sprinkles',
+            'Nibbles', 'Cuddles', 'Bubbles', 'Daisy', 'Lucky',
+            'Marshmallow', 'Teddy', 'Sunny', 'Buttons', 'Little Timmy'
+        ];
+        let pandaCount = 0;
+        let pandas = [];
+
+        function spawnPanda() {
+            const panda = document.createElement('div');
+            panda.className = 'panda';
+            panda.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            panda.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+
+            const isLittleTimmy = Math.random() < 0.08; 
+            const pandaName = isLittleTimmy ? 'Little Timmy' : pandaNames[Math.floor(Math.random() * pandaNames.length)];
+            const pandaColor = isLittleTimmy ? '' : pandaColors[Math.floor(Math.random() * pandaColors.length)];
+
+            const pandaFace = `
+                <div class="panda-face ${isLittleTimmy ? 'rainbow' : ''}" style="background-color: ${isLittleTimmy ? 'rainbow' : pandaColor};">
+                    <div class="ear left"></div>
+                    <div class="ear right"></div>
+                    <div class="eye left" style="background-color: black;"></div>
+                    <div class="eye right" style="background-color: black;"></div>
+                    <div class="nose" style="background-color: black;"></div>
+                    <div class="mouth" style="border-color: black;"></div>
+                </div>
+            `;
+
+            panda.innerHTML = pandaFace + `<div class="panda-name">${pandaName}</div>`;
+            document.body.appendChild(panda);
+            pandas.push(panda); // Add panda to the array
+            pandaCount++;
+            document.getElementById('counter').innerText = 'Pandas: ' + pandaCount;
+
+            continuousMovement(panda);
+        }
+
+        function continuousMovement(panda) {
+            const targetX = Math.random() * (window.innerWidth - 50);
+            const targetY = Math.random() * (window.innerHeight - 50);
+            const speed = 0.5;
+
+            function move() {
+                const rect = panda.getBoundingClientRect();
+                const deltaX = targetX - rect.left - 25;
+                const deltaY = targetY - rect.top - 25;
+
+                if (Math.abs(deltaX) > speed || Math.abs(deltaY) > speed) {
+                    panda.style.left = (rect.left + (Math.abs(deltaX) < speed ? deltaX : Math.sign(deltaX) * speed)) + 'px';
+                    panda.style.top = (rect.top + (Math.abs(deltaY) < speed ? deltaY : Math.sign(deltaY) * speed)) + 'px';
+                    requestAnimationFrame(move);
+                } else {
+                    continuousMovement(panda);
+                }
+            }
+
+            requestAnimationFrame(move);
+        }
+
+        document.getElementById('spawnPanda').onclick = spawnPanda;
+
+        // Remove Pandas functionality
+        document.getElementById('removePandasButton').onclick = () => {
+            document.getElementById('popup').style.display = 'block';
+        };
+
+        document.querySelector('.yes-button').onclick = () => {
+            pandas.forEach(panda => panda.remove());
+            pandas = []; // Clear the pandas array
+            pandaCount = 0;
+            document.getElementById('counter').innerText = 'Pandas: 0';
+            document.getElementById('popup').innerHTML = '<p>Sent!</p>';
+            setTimeout(() => {
+                document.getElementById('popup').style.display = 'none';
+                document.getElementById('popup').innerHTML = `
+                    <p>The pandas are leaving to a panda sanctuary. Do you want to send them?</p>
+                    <button class="popup-button yes-button">Yes</button>
+                    <button class="popup-button no-button">No</button>
+                `;
+            }, 2000);
+        };
+
+        document.querySelector('.no-button').onclick = () => {
+            document.getElementById('popup').style.display = 'none';
+        };
+
+        // Save and Load functionality
+        document.getElementById('saveButton').onclick = () => {
+            const saveCode = btoa(pandaCount); // Encode the panda count
+            prompt("Your save code is:", saveCode); // Show the code to the user
+        };
+
+        document.getElementById('loadButton').onclick = () => {
+            const inputCode = prompt("Enter your save code:");
+            if (inputCode) {
+                const decodedCount = parseInt(atob(inputCode)); // Decode the save code
+                if (!isNaN(decodedCount)) {
+                    for (let i = 0; i < decodedCount; i++) {
+                        spawnPanda(); // Spawn the saved number of pandas
+                    }
+                } else {
+                    alert("Invalid save code.");
+                }
+            }
+        };
+
+        // Fullscreen toggle
+        document.getElementById('fullscreenButton').onclick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+    </script>
+
+</body>
+</html>
+
+
+
